@@ -1,43 +1,41 @@
 import { ROLE_LABEL, fmtShort, useApi } from "../api";
+import { Cat, ErrorBox, Icon, Loading } from "../ui";
 
 export default function Profile() {
-  const { data, error } = useApi<any>("profile");
-  if (error) return <p className="err">{error}</p>;
-  if (!data) return <p className="muted">Загрузка…</p>;
+  const { data, error, reload } = useApi<any>("profile");
+  if (error) return <ErrorBox message={error} onRetry={reload} />;
+  if (!data) return <Loading />;
 
   const { me, attended, signups, achievements } = data;
   const earned = achievements.filter((a: any) => a.earned_at).length;
 
   return (
     <>
-      <div className="card hero">
-        <div className="avatar">{(me.first_name ?? "?").slice(0, 1).toUpperCase()}</div>
+      <div className="hero">
+        <span className="avatar"><Cat size={64} /></span>
         <div>
-          <h2 style={{ margin: 0 }}>{me.first_name ?? "Участник"}</h2>
-          <p className="muted small">
-            {me.username ? `@${me.username} · ` : ""}
-            {ROLE_LABEL[me.role]}
-          </p>
+          <h1>{me.first_name ?? "Участник"}</h1>
+          <p className="muted">{ROLE_LABEL[me.role]}</p>
+          {me.username && <p className="muted small">@{me.username}</p>}
         </div>
       </div>
 
-      <div className="stats">
-        <div className="card"><b>{attended}</b><span>посещено</span></div>
-        <div className="card"><b>{signups}</b><span>записей</span></div>
-        <div className="card"><b>{earned}/{achievements.length}</b><span>достижений</span></div>
-      </div>
+      <dl className="stats">
+        <div><dd>{attended}</dd><dt>Посещено</dt></div>
+        <div><dd>{signups}</dd><dt>Записей</dt></div>
+        <div><dd>{earned}<small>/{achievements.length}</small></dd><dt>Достижений</dt></div>
+      </dl>
 
       <h2>Достижения</h2>
-      <div className="grid">
+      <ul className="grid">
         {achievements.map((a: any) => (
-          <div className={`card ach ${a.earned_at ? "" : "locked"}`} key={a.code}>
-            <div className="big">{a.icon}</div>
+          <li className={`card ach ${a.earned_at ? "" : "locked"}`} key={a.code}>
+            <span className="medal" aria-hidden="true">{a.earned_at ? a.icon : <Icon name="lock" size={24} />}</span>
             <h3>{a.title}</h3>
-            <p className="small muted">{a.description}</p>
-            {a.earned_at && <p className="small ok-text">Получено {fmtShort(a.earned_at)}</p>}
-          </div>
+            <p className="small muted">{a.earned_at ? `Получено ${fmtShort(a.earned_at)}` : a.description}</p>
+          </li>
         ))}
-      </div>
+      </ul>
     </>
   );
 }

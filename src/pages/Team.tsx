@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api, confirmAsync, fmtDate, notify, useApi, useBusy } from "../api";
+import { api, confirmAsync, fmtDate, notify, plural, useApi, useBusy } from "../api";
 import { EventsAdmin, MaterialsAdmin, NewsAdmin, PeopleAdmin } from "./Admin";
 
 type Sub = "events" | "stock" | "news" | "manage" | "people" | "materials";
@@ -67,7 +67,7 @@ function TeamEvent({ e, reload }: { e: any; reload: () => void }) {
         {wait.length > 0 && ` · ⏳ ${wait.length} в очереди`}
       </p>
       {e.avg_rating != null && (
-        <p className="meta">⭐ {e.avg_rating.toFixed(1)} ({e.feedback.length} отзывов)</p>
+        <p className="meta">⭐ {e.avg_rating.toFixed(1)} ({e.feedback.length} {plural(e.feedback.length, "отзыв", "отзыва", "отзывов")})</p>
       )}
       <button className="link" onClick={() => setOpen(!open)}>{open ? "Скрыть" : "Участники и отзывы"}</button>
 
